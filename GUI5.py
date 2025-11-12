@@ -207,10 +207,11 @@ class BrainwavesBackend(QObject):
         self.image_paths = []  # Store converted image paths
         self.plots_dir = os.path.abspath("plotscode/plots")  # Base plots directory
         self.current_dataset = "refresh"  # Default dataset to display
+        self.connected = False
+        self.drone_lock = threading.Lock()
+
         try:
             self.tello = Tello()
-            self.connected = False
-            self.drone_lock = threading.Lock()
         except Exception as e:
             print(f"Warning: Failed to initialize Tello drone: {e}")
             self.logMessage.emit(f"Warning: Failed to initialize Tello drone: {e}")
@@ -419,11 +420,11 @@ class BrainwavesBackend(QObject):
                 elif action == 'turn_left':
                     self.tello.rotate_counter_clockwise(45)
                     self.logMessage.emit("Rotating left")
-                    self.flight_log.insert(0, "Rotating left 45cm")
+                    self.flight_log.insert(0, "Rotating left 45°")
                 elif action == 'turn_right':
                     self.tello.rotate_clockwise(45)
                     self.logMessage.emit("Rotating right")
-                    self.flight_log.insert(0, "Rotating right 45cm")
+                    self.flight_log.insert(0, "Rotating right 45°")
                 elif action == 'takeoff':
                     self.tello.takeoff()
                     self.logMessage.emit("Taking off")
@@ -446,7 +447,9 @@ class BrainwavesBackend(QObject):
                 else:
                     self.logMessage.emit("Unknown action")
                     self.flight_log.insert(0, "Unknown action")
-                    self.flightLogUpdated.emit(self.flight_log)
+
+
+                self.flightLogUpdated.emit(self.flight_log)
 
 
             except Exception as e:
