@@ -8,6 +8,7 @@ from PySide6.QtCore import QObject, Signal, Slot, Property, QProcess, QUrl
 from pdf2image import convert_from_path
 from djitellopy import Tello
 import random
+import threading
 import re
 import pandas as pd
 import time
@@ -208,6 +209,7 @@ class BrainwavesBackend(QObject):
         self.current_dataset = "refresh"  # Default dataset to display
         try:
             self.tello = Tello()
+            self.connected = False
         except Exception as e:
             print(f"Warning: Failed to initialize Tello drone: {e}")
             self.logMessage.emit(f"Warning: Failed to initialize Tello drone: {e}")
@@ -366,12 +368,21 @@ class BrainwavesBackend(QObject):
         self.flightLogUpdated.emit(self.flight_log)
 
     @Slot(str)
+    def doDroneTAction(self, action):
+        threading.Thread(target=self.getDroneAction, args=(action,), daemon=True).start()
+
+    @Slot(str)
     def getDroneAction(self, action):
         try:
             if action == 'connect':
                 self.tello.connect()
+                self.connected = True
                 self.logMessage.emit("Connected to Tello Drone")
-            elif action == 'up':
+            elif self.connected:
+                self.logMessage.emit("Drone did not connect.")
+                return
+
+            if action == 'up':
                 self.tello.move_up(30)
                 self.logMessage.emit("Moving up")
             elif action == 'down':
