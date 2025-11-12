@@ -210,6 +210,7 @@ class BrainwavesBackend(QObject):
         try:
             self.tello = Tello()
             self.connected = False
+            self.drone_lock = threading.Lock()
         except Exception as e:
             print(f"Warning: Failed to initialize Tello drone: {e}")
             self.logMessage.emit(f"Warning: Failed to initialize Tello drone: {e}")
@@ -373,57 +374,89 @@ class BrainwavesBackend(QObject):
 
     @Slot(str)
     def getDroneAction(self, action):
-        try:
-            if action == 'connect':
-                self.tello.connect()
-                self.connected = True
-                self.logMessage.emit("Connected to Tello Drone")
-            elif self.connected:
-                self.logMessage.emit("Drone did not connect.")
-                return
+        with self.drone_lock:
+            try:
+                if action == 'connect':
+                    self.tello.connect()
+                    battery = self.tello.get_battery()
+                    self.connected = True
+                    self.logMessage.emit("Connected to Tello Drone")
+                    self.logMessage.emit(f"Connected to Tello Drone (Battery: {battery}%)")
+                    self.flight_log.insert(0, f"Drone connected (Battery: {battery}%)")
+                    self.flightLogUpdated.emit(self.flight_log)
+                    return
 
-            if action == 'up':
-                self.tello.move_up(30)
-                self.logMessage.emit("Moving up")
-            elif action == 'down':
-                self.tello.move_down(30)
-                self.logMessage.emit("Moving down")
-            elif action == 'forward':
-                self.tello.move_forward(30)
-                self.logMessage.emit("Moving forward")
-            elif action == 'backward':
-                self.tello.move_back(30)
-                self.logMessage.emit("Moving backward")
-            elif action == 'left':
-                self.tello.move_left(30)
-                self.logMessage.emit("Moving left")
-            elif action == 'right':
-                self.tello.move_right(30)
-                self.logMessage.emit("Moving right")
-            elif action == 'turn_left':
-                self.tello.rotate_counter_clockwise(45)
-                self.logMessage.emit("Rotating left")
-            elif action == 'turn_right':
-                self.tello.rotate_clockwise(45)
-                self.logMessage.emit("Rotating right")
-            elif action == 'takeoff':
-                self.tello.takeoff()
-                self.logMessage.emit("Taking off")
-            elif action == 'land':
-                self.tello.land()
-                self.logMessage.emit("Landing")
-            elif action == 'go_home':
-                self.go_home()
-            elif action == 'stream':
-                if hasattr(self, 'camera_controller'):
-                    self.camera_controller.start_camera_stream()
-                    self.logMessage.emit("Starting camera stream")
+                if not self.connected:
+                    self.logMessage.emit("Drone not connected. Please connect first.")
+                    self.flight_log.insert(0, "Command failed: Drone not connected")
+                    self.flightLogUpdated.emit(self.flight_log)
+                    return
+
+                if action == 'up':
+                    self.tello.move_up(30)
+                    self.logMessage.emit("Moving up")
+                    self.flight_log.insert(0, "Moving up 30cm")
+                elif action == 'down':
+                    self.tello.move_down(30)
+                    self.logMessage.emit("Moving down")
+                    self.flight_log.insert(0, "Moving down 30cm")
+                elif action == 'forward':
+                    self.tello.move_forward(30)
+                    self.logMessage.emit("Moving forward")
+                    self.flight_log.insert(0, "Moving forward 30cm")
+                elif action == 'backward':
+                    self.tello.move_back(30)
+                    self.logMessage.emit("Moving backward")
+                    self.flight_log.insert(0, "Moving backward 30cm")
+                elif action == 'left':
+                    self.tello.move_left(30)
+                    self.logMessage.emit("Moving left")
+                    self.flight_log.insert(0, "Moving left 30cm")
+                elif action == 'right':
+                    self.tello.move_right(30)
+                    self.logMessage.emit("Moving right")
+                    self.flight_log.insert(0, "Moving right 30cm")
+                elif action == 'turn_left':
+                    self.tello.rotate_counter_clockwise(45)
+                    self.logMessage.emit("Rotating left")
+                    self.flight_log.insert(0, "Rotating left 45cm")
+                elif action == 'turn_right':
+                    self.tello.rotate_clockwise(45)
+                    self.logMessage.emit("Rotating right")
+                    self.flight_log.insert(0, "Rotating right 45cm")
+                elif action == 'takeoff':
+                    self.tello.takeoff()
+                    self.logMessage.emit("Taking off")
+                    self.flight_log.insert(0, "Taking off 30cm")
+                elif action == 'land':
+                    self.tello.land()
+                    self.logMessage.emit("Landing")
+                    self.flight_log.insert(0, "Landing")
+                elif action == 'go_home':
+                    self.go_home()
+                    self.flight_log.insert(0, "Returning home")
+                elif action == 'stream':
+                    if hasattr(self, 'camera_controller'):
+                        self.camera_controller.start_camera_stream()
+                        self.logMessage.emit("Starting camera stream")
+                        self.flight_log.insert(0, "Camera stream started")
+                    else:
+                        self.logMessage.emit("Camera controller not available")
+                        self.flight_log.insert(0, "Camera controller not available")
                 else:
-                    self.logMessage.emit("Camera controller not available")
-            else:
-                self.logMessage.emit("Unknown action")
-        except Exception as e:
-            self.logMessage.emit(f"Error during {action}: {e}")
+                    self.logMessage.emit("Unknown action")
+                    self.flight_log.insert(0, "Unknown action")
+                    self.flightLogUpdated.emit(self.flight_log)
+
+
+            except Exception as e:
+                error_msg = f"Error during {action}: {str(e)}"
+                self.logMessage.emit(error_msg)
+                self.flight_log.insert(0, error_msg)
+                self.flightLogUpdated.emit(self.flight_log)
+                # If critical error, mark as disconnected
+                if "Tello" in str(e) or "timeout" in str(e).lower():
+                    self.connected = False
 
     # Method for returning to home (an approximation)
     def go_home(self):
