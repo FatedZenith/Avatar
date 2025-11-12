@@ -66,7 +66,7 @@ ApplicationWindow {
                             buttonText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("home");
+                            droneController.doDroneTAction("home");
                         }
                     }
                 }
@@ -119,7 +119,7 @@ ApplicationWindow {
                                 upButtonText.color = "white"; // Revert text color to white on exit
                             }
                             onClicked: {
-                                droneController.getDroneAction("up");
+                                droneController.doDroneTAction("up");
                             }
                         }
                     }
@@ -223,7 +223,7 @@ ApplicationWindow {
                             forwardBackground.color = "#242c4d"; // Revert background color on exit
                             forwardText.color = "white"; // Revert text color to white on exit
                         }
-                        onClicked: droneController.getDroneAction("forward")
+                        onClicked: droneController.doDroneTAction("forward")
                     }
                 }
             }
@@ -275,7 +275,7 @@ ApplicationWindow {
                             turnLeftText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("turn_left");
+                            droneController.doDroneTAction("turn_left");
                         }
                     }
                 }
@@ -323,7 +323,7 @@ ApplicationWindow {
                             leftText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("left");
+                            droneController.doDroneTAction("left");
                         }
                     }
                 }
@@ -371,7 +371,7 @@ ApplicationWindow {
                             streamText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("stream");
+                            droneController.doDroneTAction("stream");
                         }
                     }
                 }
@@ -419,7 +419,7 @@ ApplicationWindow {
                             rightText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("right");
+                            droneController.doDroneTAction("right");
                         }
                     }
                 }
@@ -468,7 +468,7 @@ ApplicationWindow {
                             turnRightText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("turn_right");
+                            droneController.doDroneTAction("turn_right");
                         }
                     }
                 }
@@ -522,7 +522,7 @@ ApplicationWindow {
                             backButtonText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("backward"); // Action for the "Back" button
+                            droneController.doDroneTAction("backward"); // Action for the "Back" button
                         }
                     }
                 }
@@ -576,7 +576,7 @@ ApplicationWindow {
                             connectButtonText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                           droneController.getDroneAction("connect"); // Action for the "Connect" button
+                           droneController.doDroneTAction("connect"); // Action for the "Connect" button
                         }
                     }
                 }
@@ -624,7 +624,7 @@ ApplicationWindow {
                             downButtonText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("down"); // Action for the "Down" button
+                            droneController.doDroneTAction("down"); // Action for the "Down" button
                         }
                     }
                 }
@@ -671,7 +671,7 @@ ApplicationWindow {
                             takeoffButtonBackground.color = "#242c4d"; // Revert background color on exit
                             takeoffButtonText.color = "white"; // Revert text color to white on exit
                         }
-                        onClicked: droneController.getDroneAction("takeoff")
+                        onClicked: droneController.doDroneTAction("takeoff")
                     }
                 }
             }
@@ -718,7 +718,7 @@ ApplicationWindow {
                             landButtonText.color = "white"; // Revert text color to white on exit
                         }
                         onClicked: {
-                            droneController.getDroneAction("land"); // Action for the "Land" button
+                            droneController.doDroneTAction("land"); // Action for the "Land" button
                         }
                     }
                 }
